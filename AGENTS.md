@@ -100,9 +100,10 @@ wizard), the Telegram bot (no equivalent), and the default client AllowedIPs
 - `wgdashboard/data/` — `wg-dashboard.ini`, `db/` (sqlite), `wg-dashboard-oidc-providers.json`.
 - `letsencrypt/acme.json` — certificates. Must be mode `600` or Traefik refuses to start.
 
-`wgdashboard/` and `letsencrypt/` are tracked via `.gitkeep` so they exist after a clone;
-their contents are ignored. Do not add a `.gitkeep` under `wgdashboard/conf/`: the image
-generates `wg0.conf` only when that directory is empty.
+`wgdashboard/` and `letsencrypt/` each carry their own `.gitignore` (`*` + `!.gitignore`)
+so the directories exist after a clone while their contents stay untracked. Do not add a
+placeholder file under `wgdashboard/conf/`: the image generates `wg0.conf` only when that
+directory is empty.
 
 ## Common tasks
 
