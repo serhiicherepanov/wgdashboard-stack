@@ -79,6 +79,10 @@ All configuration is in `.env` (gitignored). `.env.example` lists every variable
   must be publicly reachable and `WG_HOST` must resolve to this host. Wildcards are not possible
   with HTTP-01; switch to a DNS challenge if that is ever needed.
 - `TRAEFIK_DASHBOARD_USERS` — htpasswd line. If using bcrypt/md5, escape `$` as `$$`.
+- `WGD_CPU_LIMIT` / `WGD_MEM_LIMIT` / `WGD_MEM_RESERVE` and the `TRAEFIK_*` equivalents —
+  `deploy.resources` for each container. Upstream gives no sizing guidance; the defaults
+  (1 CPU / 512M for WGDashboard, 0.5 CPU / 256M for Traefik) are generous for a small VPN.
+  Raise `WGD_MEM_LIMIT` first if the container gets OOM-killed with many peers.
 
 Email/SMTP and external database settings from the upstream table are not wired; add them to
 both compose `environment` and `.env.example` if needed.

@@ -47,4 +47,14 @@ services:
       options:
         max-size: "10m"
         max-file: "5"
+    # Upstream publishes no sizing guidance. gunicorn (1 worker, 2 threads) plus the
+    # background threads sits around 150-250 MB; the limit leaves headroom for peer
+    # stats/traffic history on larger deployments. Tune via .env.
+    deploy:
+      resources:
+        limits:
+          cpus: "${WGD_CPU_LIMIT:-1.0}"
+          memory: ${WGD_MEM_LIMIT:-512M}
+        reservations:
+          memory: ${WGD_MEM_RESERVE:-128M}
     # The image ships its own HEALTHCHECK (gunicorn + log tail alive).
