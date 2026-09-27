@@ -1,4 +1,10 @@
 .env
-letsencrypt/
-wgdashboard/
 .idea
+
+# State dirs: keep the directories, ignore everything inside.
+# No .gitkeep inside wgdashboard/conf on purpose: the image only generates wg0.conf
+# when /etc/wireguard is empty.
+letsencrypt/*
+!letsencrypt/.gitkeep
+wgdashboard/*
+!wgdashboard/.gitkeep
