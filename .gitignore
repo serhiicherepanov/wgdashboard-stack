@@ -1,0 +1,4 @@
+.env
+letsencrypt/
+wgdashboard/
+.idea

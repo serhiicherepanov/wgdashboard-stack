@@ -1,0 +1,50 @@
+# Base stack: WGDashboard (WireGuard + AmneziaWG are built into the image). No reverse proxy.
+# Add Traefik with:  docker compose -f docker-compose.yaml -f docker-compose.traefik.yaml up -d
+# or set COMPOSE_FILE in .env (see .env.example).
+
+services:
+  wgdashboard:
+    image: ghcr.io/wgdashboard/wgdashboard:${WGD_TAG:-latest}
+    container_name: wgdashboard
+    restart: always
+    cap_add:
+      - NET_ADMIN
+      # Only if the host kernel does not already have the wireguard module loaded.
+      # - SYS_MODULE
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv4.ip_forward=1
+    environment:
+      - TZ=${TZ:-Asia/Tbilisi}
+      # Endpoint written into client configs (hostname or IP). Same role as SERVERURL in
+      # linuxserver/wireguard. If empty the image queries ifconfig.me on every start.
+      - public_ip=${WG_HOST}
+      - global_dns=${WGD_GLOBAL_DNS:-9.9.9.9}
+      # Interface(s) to bring up when the container starts.
+      - wg_autostart=${WGD_AUTOSTART:-wg0}
+      # Initial admin account. Empty = not touched (first login goes through the welcome wizard).
+      # The image re-applies non-empty values on EVERY start (dynamic_config=true), so clear them
+      # in .env once you want to manage the account from the UI.
+      - username=${WGD_USERNAME:-}
+      - password=${WGD_PASSWORD:-}
+      - enable_totp=${WGD_ENABLE_TOTP:-}
+    volumes:
+      # wg0.conf (+ any extra interfaces). Generated from the image template on first boot
+      # only if this directory is empty.
+      - ./wgdashboard/conf:/etc/wireguard
+      # AmneziaWG interfaces, if you ever create any.
+      - ./wgdashboard/aconf:/etc/amnezia/amneziawg
+      # wg-dashboard.ini, sqlite DB, OIDC providers.
+      - ./wgdashboard/data:/data
+    ports:
+      # Must match ListenPort in wgdashboard/conf/wg0.conf (template default: 51820).
+      - "${WG_PORT:-51820}:${WG_PORT:-51820}/udp"
+      # Web UI. Bound to localhost by default; with the traefik overlay the proxy handles
+      # public access.
+      - "${WGD_BIND:-127.0.0.1}:${WGD_PORT:-10086}:10086/tcp"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+    # The image ships its own HEALTHCHECK (gunicorn + log tail alive).
