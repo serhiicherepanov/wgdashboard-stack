@@ -1,0 +1,3 @@
+# Runtime state lives here. Keep the directory, ignore everything in it.
+*
+!.gitignore
